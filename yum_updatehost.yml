@@ -1,8 +1,20 @@
-# mig yum update host
-- host: localhost
-  gather_facts: false
-  tasks:
-    - name: yum update
-      include_role:
-        name: ansible-linux-patch-automation
-        tasks_from: yum-update.yml
+---
+#- name: "Add server to in-memory inventory"
+#  hosts: localhost
+#  gather_facts: false  
+#  tasks:
+#    - name: "Add server to in-memory inventory group"
+#      add_host:
+#        name: "{{ server_to_patch }}"
+#        groups: patch_all
+        
+- name: "Patching linux servers using ansible-linux-patch-post-checks roles"
+  hosts: all
+  gather_facts: True
+  remote_user: root
+  become: yes
+  vars: 
+    patching_type: "SYSTEM_UPDATE"
+  roles:
+    - ansible-linux-patch-yum.update
+

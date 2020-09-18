@@ -29,35 +29,35 @@
     when: servicestatus.stat.exists == False
 
 # Check the status of VASTOOL service
-  - name: Check status of VAS, if it exist already
-    shell: '/opt/quest/bin/{{ servicename }} status'
-    register: vastool_status
-    ignore_errors: yes
-    changed_when: false
+#  - name: Check status of VAS, if it exist already
+#    shell: '/opt/quest/bin/{{ servicename }} status'
+#    register: vastool_status
+#    ignore_errors: yes
+#    changed_when: false
 
-  - set_fact:
-      vastool_status: "{{ vastool_status.stdout.split('\n')[4].split(':') }}"
-    when: servicestatus.stat.exists != False
+#  - set_fact:
+#      vastool_status: "{{ vastool_status.stdout.split('\n')[4].split(':') }}"
+#    when: servicestatus.stat.exists != False
 
 # Create a report in a delegate server " LOCALHOST " in case vastool service status is OK #
-  - name: "Creating a report when vastool service status check is OK"
-    lineinfile:
-      line: "HOSTNAME: {{ inventory_hostname }} | {{ vastool_status }} : ***No tests failed***"
-      dest: "{{ local_dir }}/update.{{ inventory_hostname }}.VASTOOL.OK.{{ timestamp }}"
-      create: yes
-    delegate_to: localhost
-    when: "'Result' in vastool_status"
-    loop: "{{ vastool_status }}"
+#  - name: "Creating a report when vastool service status check is OK"
+#    lineinfile:
+#      line: "HOSTNAME: {{ inventory_hostname }} | {{ vastool_status }} : ***No tests failed***"
+#      dest: "{{ local_dir }}/update.{{ inventory_hostname }}.VASTOOL.OK.{{ timestamp }}"
+#      create: yes
+#    delegate_to: localhost
+#    when: "'Result' in vastool_status"
+#    loop: "{{ vastool_status }}"
 
 # Create a failed report in a delegate server " LOCALHOST " in case vastool service status failed #
-  - name: "send Error msg if vastool service status failed"
-    lineinfile:
-      line: "HOSTNAME: {{ inventory_hostname }} | {{ vastool_status }} : ***Test(s) failed***"
-      dest: "{{ local_dir }}/update.{{ inventory_hostname }}.VASTOOL.FAILED.{{ timestamp }}"
-      create: yes
-    delegate_to: localhost
-    when: "'WARNING' in vastool_status"
-    loop: "{{ vastool_status }}"
+#  - name: "send Error msg if vastool service status failed"
+#    lineinfile:
+#      line: "HOSTNAME: {{ inventory_hostname }} | {{ vastool_status }} : ***Test(s) failed***"
+#      dest: "{{ local_dir }}/update.{{ inventory_hostname }}.VASTOOL.FAILED.{{ timestamp }}"
+#      create: yes
+#    delegate_to: localhost
+#    when: "'WARNING' in vastool_status"
+#    loop: "{{ vastool_status }}"
 
   - name: "Return service state information"
     service_facts:

@@ -4,6 +4,7 @@
     args:
       warn: false
     register: LAST_KERNEL
+  - debug: var=LAST_KERNEL
 
   - name: get current time before reboot
     shell: /bin/date +%s

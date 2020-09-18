@@ -10,7 +10,7 @@ update_default: true
 reboot_default: true
 server_update_reboot_connect_timeout: 5
 server_update_reboot_pre_reboot_delay: 30
-server_update_reboot_post_reboot_delay: 100
+server_update_reboot_post_reboot_delay: 180
 server_update_reboot_reboot_timeout: 600
 server_update_yum_install_pkgs: '*'
 server_update_yum_exclude_pkgs: []
