@@ -1,0 +1,8 @@
+# mig yum update host
+- host: localhost
+  gather_facts: false
+  tasks:
+    - name: yum update
+      include_role:
+        name: ansible-linux-patch-automation
+        tasks_from: yum-update.yml
