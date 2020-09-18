@@ -9,9 +9,9 @@
 #        groups: patch_all
         
 - name: "Patching linux servers using ansible-linux-patch-post-checks roles"
-  hosts: patch_all
+  hosts: all
   gather_facts: True
-  remote_user: toweragent
+  remote_user: root
   become: yes
   vars: 
     patching_type: "SYSTEM_UPDATE"

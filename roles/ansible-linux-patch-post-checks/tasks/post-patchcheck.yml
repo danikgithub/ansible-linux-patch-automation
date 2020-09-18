@@ -14,7 +14,7 @@
   - name: "set patching time"
     set_fact:
       timestamp: "{{ ansible_date_time.iso8601_basic_short }}"
-    delegate_to: xlab2359.aetnat.com
+    delegate_to: localhost
 
 # Check if VASTOOL service exist
   - name: Check if vastool service exists
@@ -45,7 +45,7 @@
       line: "HOSTNAME: {{ inventory_hostname }} | {{ vastool_status }} : ***No tests failed***"
       dest: "{{ local_dir }}/update.{{ inventory_hostname }}.VASTOOL.OK.{{ timestamp }}"
       create: yes
-    delegate_to: xlab2359.aetnat.com
+    delegate_to: localhost
     when: "'Result' in vastool_status"
     loop: "{{ vastool_status }}"
 
@@ -55,7 +55,7 @@
       line: "HOSTNAME: {{ inventory_hostname }} | {{ vastool_status }} : ***Test(s) failed***"
       dest: "{{ local_dir }}/update.{{ inventory_hostname }}.VASTOOL.FAILED.{{ timestamp }}"
       create: yes
-    delegate_to: xlab2359.aetnat.com
+    delegate_to: localhost
     when: "'WARNING' in vastool_status"
     loop: "{{ vastool_status }}"
 
@@ -78,7 +78,7 @@
       line: "HOSTNAME: {{ inventory_hostname }} | {{ item }} : OK "
       dest: "{{ local_dir }}/update.{{ inventory_hostname }}.OK.{{ timestamp }}"
       create: yes
-    delegate_to: xlab2359.aetnat.com
+    delegate_to: localhost
     when: ansible_facts.services[item]['state'] == "running" and start_failed is not failed
     loop: "{{ ansible_facts.services.keys() }}"
 
@@ -90,7 +90,7 @@
         line: "HOSTNAME: {{ inventory_hostname }} | {{ item.item }} : OK Please check it"
         dest: "{{ local_dir }}/update.{{ inventory_hostname }}.FAILED.{{ timestamp }}"
         create: yes
-      delegate_to: xlab2359.aetnat.com
+      delegate_to: localhost
       when:
         - item.skipped is not defined
         - item.state is not defined
@@ -134,7 +134,7 @@
       line: "HOSTNAME: {{ inventory_hostname }} | {{ item.stdout }} : MOUNTED "
       dest: "{{ local_dir }}/update.{{ inventory_hostname }}.OK.{{ timestamp }}"
       create: yes
-    delegate_to: xlab2359.aetnat.com
+    delegate_to: localhost
     when: item.rc == 0
     loop: "{{ fs_checked.results }}"
 
@@ -146,7 +146,7 @@
         line: "HOSTNAME: {{ inventory_hostname }} | {{ item.item }} : ****NOT MOUNTED***** "
         dest: "{{ local_dir }}/update.{{ inventory_hostname }}.FAILED.{{ timestamp }}"
         create: yes
-      delegate_to: xlab2359.aetnat.com
+      delegate_to: localhost
       when: item.rc != 0
       loop: "{{ fs_checked.results }}"
 
@@ -169,7 +169,7 @@
       line: "HOSTNAME: {{ inventory_hostname }} | interface {{ item.item }} : OK "
       dest: "{{ local_dir }}/update.{{ inventory_hostname }}.OK.{{ timestamp }}"
       create: yes
-    delegate_to: xlab2359.aetnat.com
+    delegate_to: localhost
     loop: "{{ NIC_interface['results'] }}"
   when: item.skip_reason is not defined
 
@@ -179,7 +179,7 @@
         line: "HOSTNAME: {{ inventory_hostname }} | interface {{ item.item }} : ****NOT ACTIVE**** "
         dest: "{{ local_dir }}/update.{{ inventory_hostname }}.FAILED.{{ timestamp }}"
         create: yes
-      delegate_to: xlab2359.aetnat.com
+      delegate_to: localhost
 
 - block:
   - name: "Assert that the interface IP address did not change"
@@ -192,7 +192,7 @@
       line: "HOSTNAME: {{ inventory_hostname }} | interface {{ item.item.item }} : {{ item.msg }} : OK  "
       dest: "{{ local_dir }}/update.{{ inventory_hostname }}.OK.{{ timestamp }}"
       create: yes
-    delegate_to:  xlab2359.aetnat.com
+    delegate_to:  localhost
     loop: "{{ NIC_IP['results'] }}"
   when: item.skip_reason is not defined
 
@@ -202,7 +202,7 @@
         line: "HOSTNAME: {{ inventory_hostname }} | interface {{ item.item.item }} :  PLEASE CHECK THE IP ADDRESS"
         dest: "{{ local_dir }}/update.{{ inventory_hostname }}.FAILED.{{ timestamp }}"
         create: yes
-      delegate_to: xlab2359.aetnat.com
+      delegate_to: localhost
 
 # Make sure SELinux status does not changed after reboot  
 - name: "check SELinux Status before the patching"
@@ -219,7 +219,7 @@
       line: "HOSTNAME: {{ inventory_hostname }} | SELinux: OK"
       dest: "{{ local_dir }}/update.{{ inventory_hostname }}.OK.{{ timestamp }}"
       create: yes
-    delegate_to: xlab2359.aetnat.com
+    delegate_to: localhost
 
   rescue:
     - name: "Send error msg if SELinux status changed"
@@ -227,7 +227,7 @@
         line: "HOSTNAME: {{ inventory_hostname }} | ***SELinux status changed***"
         dest: "{{ local_dir }}/update.{{ inventory_hostname }}.FAILED.{{ timestamp }}"
         create: yes
-      delegate_to: xlab2359.aetnat.com
+      delegate_to: localhost
 
 ##################################################################################################
 
@@ -249,34 +249,34 @@
       "      distribution_version: {{ os_info_post_update.distribution_version }}"
     dest: "{{ local_dir }}/update.{{ inventory_hostname }}.OK.{{ timestamp }}"
     create: yes
-  delegate_to: xlab2359.aetnat.com
+  delegate_to: localhost
 
 
 #################################################################################################
 #  Show Summary Report                                                                          #
 ################################################################################################# 
-#- name: set local directory variable
-#  set_fact:
-#    local_dir: "/tmp/ansible/sys-patching"
-#- name: set final report variable
-#  set_fact:
-#    final_report: "{{ local_dir }}/update.summary.{{ timestamp }}"
+- name: set local directory variable
+  set_fact:
+    local_dir: "/tmp/ansible/sys-patching"
+- name: set final report variable
+  set_fact:
+    final_report: "{{ local_dir }}/update.summary.{{ timestamp }}"
     
-#- name: " Merge all host report files. in {{ local_dir }}/update.summary.{{ timestamp }}"
-#  shell: "cat {{ item }} >> {{ local_dir }}/update.summary.{{ timestamp }}"
-#  when: item  != final_report
-#  loop: "{{ query('fileglob', '{{ local_dir }}/update.{{ inventory_hostname }}*{{ timestamp }}') }}"
+- name: " Merge all host report files. in {{ local_dir }}/update.summary.{{ timestamp }}"
+  shell: "cat {{ item }} >> {{ local_dir }}/update.summary.{{ timestamp }}"
+  when: item  != final_report
+  loop: "{{ query('fileglob', '{{ local_dir }}/update.{{ inventory_hostname }}*{{ timestamp }}') }}"
 #  loop: "{{ query('fileglob', '{{ local_dir }}/update.*{{ timestamp }}') }}"
-#  delegate_to: xlab2359.aetnat.com
+  delegate_to: localhost
 
-#- name: " Read the file {{ local_dir }}/update.summary.{{ timestamp }}"
-#  shell: "cat  {{ local_dir }}/update.summary.{{ timestamp }}"
-#  delegate_to: xlab2359.aetnat.com
-#  register: final_report
+- name: " Read the file {{ local_dir }}/update.summary.{{ timestamp }}"
+  shell: "cat  {{ local_dir }}/update.summary.{{ timestamp }}"
+  delegate_to: localhost
+  register: final_report
 
-#- name: "show report"
-#  debug:
-#    msg:
-#      - "UPDATE SUMMARY"
-#      - "{{ final_report.stdout_lines }}"
-#  delegate_to: xlab2359.aetnat.com
+- name: "show report"
+  debug:
+    msg:
+      - "UPDATE SUMMARY"
+      - "{{ final_report.stdout_lines }}"
+  delegate_to: localhost
