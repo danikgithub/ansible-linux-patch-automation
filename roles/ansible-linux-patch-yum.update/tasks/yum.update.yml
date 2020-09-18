@@ -1,4 +1,11 @@
 ---
+# Supported OS:  RHEL
+- name: "set patching time"
+  set_fact:
+    timestamp: "{{ ansible_date_time.iso8601_basic_short }}"
+  delegate_to: localhost
+  run_once: true
+
 # update systems using yum  and compare running kernel version
 - name: "Upgrade latest packages via yum"
   yum:
