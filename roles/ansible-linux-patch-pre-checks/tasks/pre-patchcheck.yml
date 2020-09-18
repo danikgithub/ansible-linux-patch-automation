@@ -7,7 +7,7 @@
 - name: "set patching time"
   set_fact:
     timestamp: "{{ ansible_date_time.iso8601_basic_short }}"
-  delegate_to: xlab2359.aetnat.com
+  delegate_to: localhost
 #  run_once: true
 
 
@@ -27,7 +27,7 @@
       dest: "{{ local_dir }}/update.{{ inventory_hostname }}.FAILED.{{ timestamp }}"
       create: yes
     when: ansible_distribution not in supported_distros
-    delegate_to: xlab2359.aetnat.com
+    delegate_to: localhost
 
   - name: "Fail host if it is not RHEL"
     fail:
@@ -55,7 +55,7 @@
     dest: "{{ local_dir }}/update.{{ inventory_hostname }}.OK.{{ timestamp }}"
     create: yes
     marker: " "
-  delegate_to: xlab2359.aetnat.com
+  delegate_to: localhost
 
 #################################################################################################
 - name: "Return service state information"
