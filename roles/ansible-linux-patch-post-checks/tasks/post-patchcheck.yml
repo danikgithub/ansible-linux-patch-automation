@@ -63,6 +63,8 @@
 - block:
   - name: "Return service state information"
     service_facts:
+  - debug:
+      var: ansible_facts.services
   - name: " Make sure the services from the pre-check are running "
     service:
       name: "{{ item }}"
