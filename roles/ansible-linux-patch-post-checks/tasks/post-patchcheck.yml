@@ -61,7 +61,7 @@
  
 ##   Make sure the services from the pre check are running and send the output result to a report file.
 - block:
-  - name: "Return service state information"
+  - name: "populate service facts and return service state information"
     service_facts:
   - debug:
       var: ansible_facts.services
@@ -96,7 +96,7 @@
         - item.skipped is not defined
         - item.state is not defined
         - item.failed == true
-      loop: "{{ start_failed.results }}"
+      loop: "{{ start_failed }}"
 
 - name: " Collect a list of the mounted device "
   set_fact:
