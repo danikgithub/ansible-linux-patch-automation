@@ -57,14 +57,17 @@
 #      create: yes
 #    delegate_to: localhost
 #    when: "'WARNING' in vastool_status"
-#    loop: "{{ vastool_status }}"
- 
-##   Make sure the services from the pre check are running and send the output result to a report file.
-- block:
+#    loop: "{{ vastool_status }}" 
   - name: "populate service facts and return service state information"
     service_facts:
-  - debug:
-      var: ansible_facts.services
+    register: ansible_facts.services
+    
+  - name: " Collect a list of services "  
+    set_fact:
+      service: "{{ ansible_facts.services }}"  
+    
+##   Make sure the services from the pre check are running and send the output result to a report file.
+- block:
   - name: " Make sure the services from the pre-check are running "
     service:
       name: "{{ item }}"
@@ -96,7 +99,7 @@
         - item.skipped is not defined
         - item.state is not defined
         - item.failed == true
-      loop: "{{ start_failed }}"
+      loop: "{{ start_failed.results }}"
 
 - name: " Collect a list of the mounted device "
   set_fact:
