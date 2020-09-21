@@ -63,7 +63,7 @@
     service_facts:
 
 ##   Make sure the services from the pre check are running and send the output result to a report file.
-- block:
+#- block:
   - name: " Make sure the services from the pre-check are running "
     service:
       name: "{{ item }}"
