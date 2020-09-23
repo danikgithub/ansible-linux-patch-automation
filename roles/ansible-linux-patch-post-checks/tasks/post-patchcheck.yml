@@ -16,8 +16,9 @@
       timestamp: "{{ ansible_date_time.iso8601_basic_short }}"
     delegate_to: localhost
 
+
 # Check if VASTOOL service exist
-  - name: Check if vastool service exists
+  - name: Check if vastool Service Exists
     stat: path=/opt/quest/bin/{{ servicename }}
     register: servicestatus
 
@@ -57,72 +58,87 @@
 #      create: yes
 #    delegate_to: localhost
 #    when: "'WARNING' in vastool_status"
-#    loop: "{{ vastool_status }}" 
-  - name: "populate service facts and return service state information"
-    service_facts:
-    register: ansible_facts.services
-    
-  - name: " Collect a list of services "  
-    set_fact:
-      service: "{{ ansible_facts.services }}"  
-    
-##   Make sure the services from the pre check are running and send the output result to a report file.
-- block:
-  - name: " Make sure the services from the pre-check are running "
-    service:
-      name: "{{ item }}"
-      state: started
-    when: ansible_facts.services[item]['state'] == "running"
-    loop: "{{ ansible_facts.services.keys() }}"
-    register: start_failed
+#    loop: "{{ vastool_status }}"
 
-# Create a report in a delegate server " LOCALHOST " in case everything is OK #
+#  - name: "Return service state information"
+#    service_facts:
+#- pause:
+#    minutes: 2
+
+- block:
+#  - name: " Make sure the services from the pre-check are running "
+#    service:
+#      name: "{{ item }}"
+#      state: started
+#    when: ansible_facts.services[item]['state'] == "running"
+#    loop: "{{ ansible_facts.services.keys() }}"
+#    register: start_failed
+
+
+#  - name: "Creating a report when starting the services successfully done"
+#    lineinfile:
+#      line: "HOSTNAME: {{ inventory_hostname }} | {{ item }} : OK "
+#      dest: "{{ local_dir }}/update.{{ inventory_hostname }}.OK.{{ timestamp }}"
+#      create: yes
+#    delegate_to: localhost
+#    when: ansible_facts.services[item]['state'] == "running" and start_failed is not failed
+#    loop: "{{ ansible_facts.services.keys() }}"
+
+#  rescue:
+#    - name: send Error msg if sarting service failed
+#      lineinfile:
+#        line: "HOSTNAME: {{ inventory_hostname }} | {{ item.item }} : KO Please check it"
+#        dest: "{{ local_dir }}/update.{{ inventory_hostname }}.FAILED.{{ timestamp }}"
+#        create: yes
+#      delegate_to: localhost
+#      when:
+#        - item.skipped is not defined
+#        - item.state is not defined
+#        - item.failed == true
+#      loop: "{{ start_failed.results }}"
+      
+  - name: populate service facts
+    service_facts:
+
+  - name: populate running services
+    set_fact:
+      services_running: "{{ services_running + [item] }}"
+    when: hostvars[inventory_hostname]['services']['{{item}}']['state'] == "running"
+    with_items: "{{ hostvars[inventory_hostname]['services'].keys() }}"
+
+  - name: populate NOT running services
+    set_fact:
+      services_NOT_running: "{{ services_NOT_running + [item] }}"
+    when: hostvars[inventory_hostname]['services']['{{item}}']['state'] != "running"
+    with_items: "{{ hostvars[inventory_hostname]['services'].keys() }}"
+
+  - debug:
+      msg: "running services: {{ services_running }}"
+
+  - debug:
+      msg: "NOT running services: {{ services_NOT_running }}"
+
+
+
   - name: "Creating a report when starting the services successfully done"
     lineinfile:
       line: "HOSTNAME: {{ inventory_hostname }} | {{ item }} : OK "
-      dest: "{{ local_dir }}/update.{{ inventory_hostname }}.OK.{{ timestamp }}"
+      dest: "{{ local_dir }}/update.{{ inventory_hostname }}.SERVICES_RUNNING.{{ timestamp }}"
       create: yes
     delegate_to: localhost
-    when: ansible_facts.services[item]['state'] == "running" and start_failed is not failed
-    loop: "{{ ansible_facts.services.keys() }}"
+    when: hostvars[inventory_hostname]['services']['{{item}}']['state'] == "running"
+    with_items: "{{ hostvars[inventory_hostname]['services'].keys() }}"
 
 
-# Create a failed report in a delegate server " LOCALHOST "  in case  one or more services failed to start after the reboot
-  rescue:
-    - name: send Error msg if starting services failed
-      lineinfile:
-        line: "HOSTNAME: {{ inventory_hostname }} | {{ item.item }} : OK Please check it"
-        dest: "{{ local_dir }}/update.{{ inventory_hostname }}.FAILED.{{ timestamp }}"
-        create: yes
-      delegate_to: localhost
-      when:
-        - item.skipped is not defined
-        - item.state is not defined
-        - item.failed == true
-      loop: "{{ start_failed.results }}"
-
-- name: " Collect a list of the mounted device "
-  set_fact:
-    dvs: "{{ ansible_mounts | map(attribute='device') | list }}"
-
-
-- name: "Register all the system interface "
-  debug:
-    msg: "{{ item }}"
-  loop: "{{ ansible_interfaces }}"
-  when:
-    - hostvars[inventory_hostname]['ansible_%s' | format(item)]['ipv4'] is defined
-    - hostvars[inventory_hostname]['ansible_%s' | format(item)]['active'] == true
-    - hostvars[inventory_hostname]['ansible_%s' | format(item)]['device'] != 'lo'
-  register: NIC_interface
-
-- name: "get the IP address for each interface"
-  debug:
-    msg: "{{ hostvars[inventory_hostname]['ansible_%s' | format(item.item)]['ipv4']['address'] }}"
-  loop: "{{ NIC_interface['results'] }}"
-  when: item.skip_reason is not defined
-  register: NIC_IP
-
+  - name: send Error msg if sarting service failed
+    lineinfile:
+      line: "HOSTNAME: {{ inventory_hostname }} | {{ item }} : NOT_RUNNING"
+      dest: "{{ local_dir }}/update.{{ inventory_hostname }}.SERVICES_NOT_RUNNING.{{ timestamp }}"
+      create: yes
+    delegate_to: localhost
+    when: hostvars[inventory_hostname]['services']['{{item}}']['state'] != "running"
+    with_items: "{{ hostvars[inventory_hostname]['services'].keys() }}"
+      
 # Validate the FSs are mounted after reboot
 - block:
   - name: " Check if the FS are mounted "
@@ -208,11 +224,8 @@
         create: yes
       delegate_to: localhost
 
-# Make sure SELinux status does not changed after reboot  
-- name: "check SELinux Status before the patching"
-  set_fact:
-    selinux_status: "{{ ansible_selinux['status'] }}"
 
+# Make sure SELinux status does not changed after reboot  
 - block:
   - name: " Assert that the SElinux status is OK "
     assert:
@@ -258,14 +271,11 @@
 
 #################################################################################################
 #  Show Summary Report                                                                          #
-################################################################################################# 
-- name: set local directory variable
-  set_fact:
-    local_dir: "/tmp/ansible/sys-patching"
-- name: set final report variable
+#################################################################################################  
+- name: set_fact
   set_fact:
     final_report: "{{ local_dir }}/update.summary.{{ timestamp }}"
-    
+
 - name: " Merge all host report files. in {{ local_dir }}/update.summary.{{ timestamp }}"
   shell: "cat {{ item }} >> {{ local_dir }}/update.summary.{{ timestamp }}"
   when: item  != final_report
