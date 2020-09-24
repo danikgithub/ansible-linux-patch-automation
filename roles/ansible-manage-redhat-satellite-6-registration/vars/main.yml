@@ -1,10 +1,10 @@
 ---
-satellite_fqdn: xlab2358.aetnat.com
+satellite_fqdn: myhost.go.com
 download_method: http
 org: Default_Organization
 location: Default Location
-A_key: rhel7_demo_key
+A_key: demo_key
 hostgroup: AP_Test_Hosts
 env: "Dev"
-admin_user: Andy
+admin_user: daniel
 admin_pass: "{{ vault_admin_pass }}"
