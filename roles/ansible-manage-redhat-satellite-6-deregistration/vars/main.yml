@@ -1,6 +1,6 @@
 ---
 # vars file for roles/manage-redhat-satellite-6-deregistration
-  satellite_fqdn: xlab2358.aetnat.com
-  username: Andy
+  satellite_fqdn: myhost.go.com
+  username: daniel
   password: "{{ vault_user_pass }}"
 
