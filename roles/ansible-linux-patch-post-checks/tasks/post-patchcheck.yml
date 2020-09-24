@@ -29,6 +29,11 @@
       msg: '{{ servicename }} not found.'
     when: servicestatus.stat.exists == False
 
+
+  - name: " Check SELinux Status before the patching "
+    set_fact:
+      selinux_status: "{{ ansible_selinux['mode'] }}"
+
 # Check the status of VASTOOL service
 #  - name: Check status of VAS, if it exist already
 #    shell: '/opt/quest/bin/{{ servicename }} status'
@@ -97,6 +102,7 @@
   - name: "populate service state and return service state information"
     service_facts:
 
+- block:
   - name: populate running services
     set_fact:
       services_running: "{{ services_running + [item] }}"
@@ -135,6 +141,29 @@
     delegate_to: localhost
     when: hostvars[inventory_hostname]['services']['{{item}}']['state'] != "running"
     with_items: "{{ hostvars[inventory_hostname]['services'].keys() }}"
+
+  - name: " Collect a list of the mounted device "
+    set_fact:
+      dvs: "{{ ansible_mounts | map(attribute='device') | list }}"
+
+  - name: "Register all the system interface "
+    debug:
+      msg: "{{ item }}"
+    loop: "{{ ansible_interfaces }}"
+    when:
+      - hostvars[inventory_hostname]['ansible_%s' | format(item)]['ipv4'] is defined
+      - hostvars[inventory_hostname]['ansible_%s' | format(item)]['active'] == true
+      - hostvars[inventory_hostname]['ansible_%s' | format(item)]['device'] != 'lo'
+    register: NIC_interface
+
+  - name: "get the IP address for each interface"
+    debug:
+      msg: "{{ hostvars[inventory_hostname]['ansible_%s' | format(item.item)]['ipv4']['address'] }}"
+    loop: "{{ NIC_interface['results'] }}"
+    when: item.skip_reason is not defined
+    register: NIC_IP
+
+
       
 # Validate the FSs are mounted after reboot
 - block:
@@ -226,7 +255,7 @@
 - block:
   - name: " Assert that the SElinux status is OK "
     assert:
-      that: ansible_selinux['status'] == selinux_status
+      that: ansible_selinux['mode'] == selinux_status
 
   - name: "Creating a report when the SELinux is OK"
     lineinfile:
