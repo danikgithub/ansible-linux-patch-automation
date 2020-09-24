@@ -3,19 +3,19 @@
         "group": [
             {
                 "hosts": [
-                    "xlab2359.aetnat.com",
-                    "xlab2360.aetnat.com"
+                    "x",
+                    "x"
                 ], 
-                "name": "patch_all", 
+                "name": "", 
                 "sub_groups": []
             }
         ], 
         "host": [
             {
-                "name": "xlab2359.aetnat.com"
+                "name": ""
             },
             {
-                "name": "xlab2360.aetnat.com"
+                "name": ""
             }
         ], 
         "inventory_source": [], 
@@ -38,19 +38,14 @@
             {
                 "name": "Admin", 
                 "team": [
-                    "SADT-Lin"
+                    ""
                 ], 
                 "user": []
             }, 
             {
-                "name": "Ad Hoc", 
+                "name": "", 
                 "team": [], 
                 "user": []
             }
         ]
-    }, 
-    "asset_type": "inventory", 
-    "name": "SrvAutoDevTool/ansible-red-hat-satellite-patch-sandbox/rhel_patch_inventory", 
-    "organization": "Aetna", 
-    "variables": "---"
-}
+   ",
