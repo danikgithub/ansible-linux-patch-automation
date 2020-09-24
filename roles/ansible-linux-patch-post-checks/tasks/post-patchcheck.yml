@@ -97,7 +97,6 @@
   - name: "populate service state and return service state information"
     service_facts:
 
-- block:
   - name: populate running services
     set_fact:
       services_running: "{{ services_running + [item] }}"
