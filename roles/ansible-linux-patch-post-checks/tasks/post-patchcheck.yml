@@ -60,12 +60,9 @@
 #    when: "'WARNING' in vastool_status"
 #    loop: "{{ vastool_status }}"
 
-  - name: "populate service state and return service state information"
-    service_facts:
 #- pause:
 #    minutes: 2
 
-- block:
 #  - name: " Make sure the services from the pre-check are running "
 #    service:
 #      name: "{{ item }}"
@@ -96,6 +93,11 @@
 #        - item.state is not defined
 #        - item.failed == true
 #      loop: "{{ start_failed.results }}"
+
+  - name: "populate service state and return service state information"
+    service_facts:
+
+- block:
   - name: populate running services
     set_fact:
       services_running: "{{ services_running + [item] }}"
