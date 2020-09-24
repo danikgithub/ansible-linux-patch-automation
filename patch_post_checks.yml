@@ -9,9 +9,9 @@
 #        groups: patch_all
         
 - name: "Patching linux servers using ansible-linux-patch-post-checks roles"
-  hosts: dev
+  hosts: all
   gather_facts: True
-  remote_user: daniel
+  remote_user: root
   become: yes
   vars: 
     newline_character: "\n"
