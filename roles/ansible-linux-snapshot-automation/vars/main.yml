@@ -1,18 +1,18 @@
 ---
-   vcenter_host: HVMTSSSVCTRAP02.aett.aetnat.com
-   vcenter_user: ZZ444645@aett.aetnat.com
+   vcenter_host: .xxx.xxx.com
+   vcenter_user: hi@aett.xxxx.com
    vcenter_pass: "{{ vault_vcenter_pass }}"
-   vcenter_datacenter: "Hartford"
+   vcenter_datacenter: "laurel"
    vm_name: "{{ vmlist }}"
-   vcenter_folder: "/Hartford Tier 2 Lab/vm"
+   vcenter_folder: "/laurel Tier 2 Lab/vm"
    snapshot_state: present
    snapshot_name: "{{ vmlist }}_snap"
-#   snapshot_name: "MM_patchauto_061820"
+#   snapshot_name: ""
    snapshot_description: "{{ vmlist }} pre-patch snapshot"
    pip_download_url: https://bootstrap.pypa.io/get-pip.py
    pip_dest: "~"
    hostname_dest: "~/removeme.txt"
    pip_path: "~/get-pip.py"
-#   vmlist: /users/n444645/data/vmlist
+#   vmlist: /users/v22/data/vmlist
  
 
