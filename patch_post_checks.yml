@@ -14,6 +14,9 @@
   remote_user: root
   become: yes
   vars: 
+    newline_character: "\n"
+    services_running: []
+    services_NOT_running: []
     patching_type: "SYSTEM_UPDATE"
   roles:
     - ansible-linux-patch-post-checks
