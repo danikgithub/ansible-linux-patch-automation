@@ -1,5 +1,8 @@
 ---
 # vars file for patch-automation
+newline_character: "\n"
+services_running: []
+services_NOT_running: []
 yum_name: "*"
 yum_state: latest
 yum_enablerepo: "rhel-?-server-rpms,rhel-?-server-satellite-tools-6.?-rpms"
