@@ -1,0 +1,23 @@
+---
+#- name: "Add server to in-memory inventory"
+#  hosts: localhost
+#  gather_facts: false  
+#  tasks:
+#    - name: "Add server to in-memory inventory group"
+#      add_host:
+#        name: "{{ server_to_patch }}"
+#        groups: patch_all
+        
+- name: "Patching linux servers using ansible-linux-patch-post-checks roles"
+  hosts: all
+  gather_facts: True
+  remote_user: root
+  become: yes
+  vars: 
+    newline_character: "\n"
+    services_running: []
+    services_NOT_running: []
+    patching_type: "SYSTEM_UPDATE"
+  roles:
+    - ansible-linux-host-reboot
+
